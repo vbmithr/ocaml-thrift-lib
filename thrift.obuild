@@ -1,0 +1,22 @@
+name: thrift
+version: 0.9.0
+obuild-ver: 1
+synopsis: OCaml library for the Apache Thrift software framework
+description: This is the OCaml library for the Apache Thrift software framework
+             It is normally distributed with Thrift, and provided here
+             as an OPAM package for convenience.
+             .
+             The Apache Thrift software framework, for scalable
+             cross-language services development, combines a software
+             stack with a code generation engine to build services
+             that work efficiently and seamlessly between C++, Java,
+             Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa,
+             JavaScript, Node.js, Smalltalk, OCaml and Delphi and
+             other languages.
+licence: Apache Licence v2.0
+homepage: http://thrift.apache.org/
+
+library thrift
+        src-dir: src
+        modules: TBinaryProtocol, TChannelTransport, TFramedTransport, Thrift, TServer, TServerSocket, TSimpleServer, TSocket, TThreadedServer
+
