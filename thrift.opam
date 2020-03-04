@@ -1,6 +1,9 @@
 opam-version: "2.0"
 maintainer: "vb@luminar.eu.org"
+authors: ["vb@luminar.eu.org"]
 build: make
+homepage: "https://github.com/vbmithr/ocaml-thrift-lib"
+bug-reports: "https://github.com/vbmithr/ocaml-thrift-lib/issues"
 remove: [["ocamlfind" "remove" "thrift"]]
 depends: [
   "ocaml" {< "4.06.0"}
