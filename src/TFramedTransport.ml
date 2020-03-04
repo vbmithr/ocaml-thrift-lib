@@ -6,22 +6,22 @@ let c_0xff_32 = Int32.of_string "0xff"
 
 (* Copied from OCamlnet rtypes.ml *)
 let encode_frame_size x =
-	let s = String.create 4 in
+	let s = Bytes.create 4 in
 	let n3 = Int32.to_int (Int32.shift_right_logical x 24) land 0xff in
 	let n2 = Int32.to_int (Int32.shift_right_logical x 16) land 0xff in
 	let n1 = Int32.to_int (Int32.shift_right_logical x 8) land 0xff in
 	let n0 = Int32.to_int (Int32.logand x c_0xff_32) in
-		String.unsafe_set s 0 (Char.unsafe_chr n3);
-		String.unsafe_set s 1 (Char.unsafe_chr n2);
-		String.unsafe_set s 2 (Char.unsafe_chr n1);
-		String.unsafe_set s 3 (Char.unsafe_chr n0);
+		Bytes.unsafe_set s 0 (Char.unsafe_chr n3);
+		Bytes.unsafe_set s 1 (Char.unsafe_chr n2);
+		Bytes.unsafe_set s 2 (Char.unsafe_chr n1);
+		Bytes.unsafe_set s 3 (Char.unsafe_chr n0);
 		s
 		
 let decode_frame_size s = 
-	let n3 = Int32.of_int (Char.code s.[0]) in
-	let n2 = Int32.of_int (Char.code s.[1]) in
-	let n1 = Int32.of_int (Char.code s.[2]) in
-	let n0 = Int32.of_int (Char.code s.[3]) in
+	let n3 = Int32.of_int (Char.code @@ Bytes.get s 0) in
+	let n2 = Int32.of_int (Char.code @@ Bytes.get s 1) in
+	let n1 = Int32.of_int (Char.code @@ Bytes.get s 2) in
+	let n0 = Int32.of_int (Char.code @@ Bytes.get s 3) in
 		Int32.logor
 		(Int32.shift_left n3 24)
 		(Int32.logor
@@ -40,10 +40,10 @@ object (self)
  
 	val mutable read_buf = None
 	val mutable read_buf_offset = 0
-	val mutable write_buf = ""
+	val mutable write_buf = "" (* TODO: use Buffer.t instead *)
 
 	method private read_frame =
-		let len_buf = String.create 4 in
+		let len_buf = Bytes.create 4 in
 		assert (transport#readAll len_buf 0 4 = 4); 
 		
 		let size = Int32.to_int (decode_frame_size len_buf) in
@@ -54,14 +54,14 @@ object (self)
 		(if size > max_length
 		then failwith (Printf.sprintf "Frame size (%i) larger than max length (%i)!" size max_length));
 
-		let buf = String.create size in
+		let buf = Bytes.create size in
 			assert (transport#readAll buf 0 size = size);
 			read_buf <- Some buf;
 			read_buf_offset <- 0
 
 	method private read_from_frame frame buf off len =
-		let to_copy = min len ((String.length frame) - read_buf_offset) in
-			String.blit frame read_buf_offset buf off to_copy;
+		let to_copy = min len ((Bytes.length frame) - read_buf_offset) in
+			Bytes.blit frame read_buf_offset buf off to_copy;
 			read_buf_offset <- read_buf_offset + to_copy;
 			to_copy
 
@@ -80,12 +80,15 @@ object (self)
 				self#read buf off len 
 	 
 	method write buf off len = 
+		write_buf <- write_buf ^ (Bytes.sub_string buf off len)
+
+	method write_string buf off len = 
 		write_buf <- write_buf ^ (String.sub buf off len)
 
 	method flush = 
 		let encoded_size = encode_frame_size (Int32.of_int (String.length write_buf)) in
-			transport#write encoded_size 0 (String.length encoded_size);
-			transport#write write_buf 0 (String.length write_buf);
+			transport#write encoded_size 0 (Bytes.length encoded_size);
+			transport#write_string write_buf 0 (String.length write_buf);
 			transport#flush; 
 			write_buf <- ""
 end

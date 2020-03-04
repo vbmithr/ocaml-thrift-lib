@@ -35,5 +35,6 @@ object (self)
     else
       raise (T.E (T.NOT_OPEN, "TChannelTransport: Channel was closed"))
   method write buf off len = output o buf off len
+  method write_string buf off len = output_substring o buf off len
   method flush = flush o
 end
