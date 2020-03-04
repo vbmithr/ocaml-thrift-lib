@@ -3,5 +3,5 @@
   (name thrift)
   (public_name thrift)
   (wrapped false)
-  (flags :standard -unsafe-string -warn-error -3-9-27-33-35)
+  (flags :standard -warn-error -3-9-27-33-35)
   (libraries threads))

@@ -51,6 +51,9 @@ object (self)
   method write buf off len = match chans with
       None -> raise (T.E (T.NOT_OPEN, "TSocket: Socket not open"))
     | Some(i,o) -> output o buf off len
+  method write_string buf off len = match chans with
+      None -> raise (T.E (T.NOT_OPEN, "TSocket: Socket not open"))
+    | Some(i,o) -> output_substring o buf off len
   method flush = match chans with
       None -> raise (T.E (T.NOT_OPEN, "TSocket: Socket not open"))
     | Some(i,o) -> flush o

@@ -30,18 +30,18 @@ let tv = P.t_type_to_i
 let vt = P.t_type_of_i
 
 
-let comp_int b n =
+let comp_int (b:bytes) n =
   let s = ref 0l in
   let sb = 32 - 8*n in
     for i=0 to (n-1) do
-      s:= Int32.logor !s (Int32.shift_left (Int32.of_int (int_of_char b.[i])) (8*(n-1-i)))
+      s:= Int32.logor !s (Int32.shift_left (Int32.of_int (int_of_char (Bytes.get b i))) (8*(n-1-i)))
     done;
     Int32.shift_right (Int32.shift_left !s sb) sb
 
-let comp_int64 b n =
+let comp_int64 (b:bytes) n =
   let s = ref 0L in
     for i=0 to (n-1) do
-      s:=Int64.logor !s (Int64.shift_left (Int64.of_int (int_of_char b.[i])) (8*(n-1-i)))
+      s:=Int64.logor !s (Int64.shift_left (Int64.of_int (int_of_char (Bytes.get b i))) (8*(n-1-i)))
     done;
     !s
 
@@ -51,7 +51,7 @@ let version_1 = 0x80010000l
 class t trans =
 object (self)
   inherit P.t trans
-  val ibyte = String.create 8
+  val ibyte = Bytes.create 8
   method writeBool b =
     ibyte.[0] <- char_of_int (if b then 1 else 0);
     trans#write ibyte 0 1
@@ -80,16 +80,16 @@ object (self)
   method writeString s=
     let n = String.length s in
       self#writeI32 (Int32.of_int n);
-      trans#write s 0 n
+      trans#write_string s 0 n
   method writeBinary a = self#writeString a
   method writeMessageBegin (n,t,s) =
     self#writeI32 (Int32.logor version_1 (Int32.of_int (P.message_type_to_i t)));
     self#writeString n;
     self#writeI32 (Int32.of_int s)
   method writeMessageEnd = ()
-  method writeStructBegin s = ()
+  method writeStructBegin _s = ()
   method writeStructEnd = ()
-  method writeFieldBegin (n,t,i) =
+  method writeFieldBegin (_n,t,i) =
     self#writeByte (tv t);
     self#writeI16 i
   method writeFieldEnd = ()
@@ -126,9 +126,9 @@ object (self)
     self#readByte = 1
   method readString =
     let sz = Int32.to_int (self#readI32) in
-    let buf = String.create sz in
+    let buf = Bytes.create sz in
       ignore (trans#readAll buf 0 sz);
-      buf
+      Bytes.unsafe_to_string buf
   method readBinary = self#readString
   method readMessageBegin =
     let ver = self#readI32 in

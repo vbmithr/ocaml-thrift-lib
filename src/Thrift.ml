@@ -44,8 +44,8 @@ struct
     method virtual isOpen : bool
     method virtual opn : unit
     method virtual close : unit
-    method virtual read : string -> int -> int -> int
-    method readAll buf off len =
+    method virtual read : bytes -> int -> int -> int
+    method readAll (buf:bytes) off len =
       let got = ref 0 in
       let ret = ref 0 in
         while !got < len do
@@ -55,7 +55,8 @@ struct
           got := !got + !ret
         done;
         !got
-    method virtual write : string -> int -> int -> unit
+    method virtual write : bytes -> int -> int -> unit
+    method virtual write_string : string -> int -> int -> unit
     method virtual flush : unit
   end
 
@@ -277,7 +278,7 @@ struct
   class factory (processor : t) =
   object
     val processor_ = processor
-    method getProcessor (trans : Transport.t) = processor_
+    method getProcessor (_trans : Transport.t) = processor_
   end;;
 end
 
@@ -347,7 +348,7 @@ struct
       ignore iprot#readStructBegin;
       (try
            while true do
-             let (name,ft,id) =iprot#readFieldBegin in
+             let (_name,ft,id) =iprot#readFieldBegin in
                if ft = Protocol.T_STOP
                then raise Break
                else ();
