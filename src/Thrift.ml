@@ -157,6 +157,17 @@ struct
     | 4 -> ONEWAY
     | _ -> raise Thrift_error
 
+    type exn_type =
+      | UNKNOWN
+      | INVALID_DATA
+      | NEGATIVE_SIZE
+      | SIZE_LIMIT
+      | BAD_VERSION
+      | NOT_IMPLEMENTED
+      | DEPTH_LIMIT
+
+  exception E of exn_type * string;;
+
   class virtual t (trans: Transport.t) =
   object (self)
     val mutable trans_ = trans
@@ -207,8 +218,6 @@ struct
         (* skippage *)
     method skip typ =
       match typ with
-        | T_STOP -> ()
-        | T_VOID -> ()
         | T_BOOL -> ignore self#readBool
         | T_BYTE
         | T_I08 -> ignore self#readByte
@@ -249,21 +258,13 @@ struct
                               self#readListEnd)
         | T_UTF8 -> ()
         | T_UTF16 -> ()
+        | _ -> raise (E (INVALID_DATA, "Invalid data"))
   end
 
   class virtual factory =
   object
     method virtual getProtocol : Transport.t -> t
   end
-
-  type exn_type =
-      | UNKNOWN
-      | INVALID_DATA
-      | NEGATIVE_SIZE
-      | SIZE_LIMIT
-      | BAD_VERSION
-
-  exception E of exn_type * string;;
 
 end;;
 
@@ -295,6 +296,9 @@ struct
       | MISSING_RESULT
       | INTERNAL_ERROR
       | PROTOCOL_ERROR
+      | INVALID_TRANSFORM
+      | INVALID_PROTOCOL
+      | UNSUPPORTED_CLIENT_TYPE
 
   let typ_of_i = function
       0l -> UNKNOWN
@@ -305,6 +309,9 @@ struct
     | 5l -> MISSING_RESULT
     | 6l -> INTERNAL_ERROR
     | 7l -> PROTOCOL_ERROR
+    | 8l -> INVALID_TRANSFORM
+    | 9l -> INVALID_PROTOCOL
+    | 10l -> UNSUPPORTED_CLIENT_TYPE
     | _ -> raise Thrift_error;;
   let typ_to_i = function
     | UNKNOWN -> 0l
@@ -315,6 +322,9 @@ struct
     | MISSING_RESULT -> 5l
     | INTERNAL_ERROR -> 6l
     | PROTOCOL_ERROR -> 7l
+    | INVALID_TRANSFORM -> 8l
+    | INVALID_PROTOCOL -> 9l
+    | UNSUPPORTED_CLIENT_TYPE -> 10l
 
   class t =
   object (self)
