@@ -14,3 +14,6 @@ env:
   - PACKAGE="thrift" CAML_VERSION="4.06"
   - PACKAGE="thrift" CAML_VERSION="4.08"
   - PACKAGE="thrift" CAML_VERSION="4.09"
+  - PACKAGE="thrift" CAML_VERSION="4.10"
+  - PACKAGE="thrift" CAML_VERSION="4.11"
+  - PACKAGE="thrift" CAML_VERSION="4.12"
