@@ -1,4 +1,4 @@
-# Thrift OCaml Software Library [![Build Status](https://travis-ci.org/vbmithr/ocaml-thrift-lib.svg?branch=master)](https://travis-ci.org/vbmithr/ocaml-thrift-lib)
+# Thrift OCaml Software Library 
 
 ## License
 
