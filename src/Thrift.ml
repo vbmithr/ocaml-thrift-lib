@@ -83,6 +83,7 @@ struct
       | T_STOP
       | T_VOID
       | T_BOOL
+      | T_BINARY
       | T_BYTE
       | T_I08
       | T_I16
@@ -98,6 +99,7 @@ struct
       | T_LIST
       | T_UTF8
       | T_UTF16
+  [@@deriving show, eq]
 
   let t_type_to_i = function
       T_STOP       -> 0
@@ -118,6 +120,7 @@ struct
     | T_LIST       -> 15
     | T_UTF8       -> 16
     | T_UTF16      -> 17
+    | T_BINARY     -> 18
 
   let t_type_of_i = function
       0 -> T_STOP
@@ -136,6 +139,7 @@ struct
     | 15 -> T_LIST
     | 16 -> T_UTF8
     | 17 -> T_UTF16
+    | 18 -> T_BINARY
     | _ -> raise Thrift_error
 
   type message_type =
@@ -258,7 +262,7 @@ struct
                               self#readListEnd)
         | T_UTF8 -> ()
         | T_UTF16 -> ()
-        | _ -> raise (E (INVALID_DATA, "Invalid data"))
+        | x -> raise (E (INVALID_DATA, Printf.sprintf "Invalid data %s" @@ show_t_type x))
   end
 
   class virtual factory =
