@@ -4,4 +4,6 @@
   (public_name thrift)
   (wrapped false)
   (flags :standard -safe-string -warn-error -3-9-27-33-35)
-  (libraries threads))
+  (libraries ocplib-endian threads)
+  (preprocess
+    (pps ppx_deriving.show ppx_deriving.eq)))

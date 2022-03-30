@@ -6,8 +6,11 @@ homepage: "https://github.com/vbmithr/ocaml-thrift-lib"
 bug-reports: "https://github.com/vbmithr/ocaml-thrift-lib/issues"
 doc: "https://vbmithr.github.io/ocaml-thrift-lib/doc"
 depends: [
+  "alcotest" { with-test & >= "0.8" }
   "ocaml" { >= "4.03.0" }
   "dune" { >= "1.1" }
+  "ppx_deriving" { >= "4.2.1" }
+  "ocplib-endian" { >= "1.1" }
 ]
 depexts: [
   ["thrift"] {os-family = "arch"}

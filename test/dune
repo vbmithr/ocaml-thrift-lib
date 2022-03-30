@@ -1,0 +1,16 @@
+(test
+  (name unit_tests)
+  (libraries thrift alcotest)
+  (preprocess
+    (pps ppx_deriving.show ppx_deriving.eq))
+  (action
+    (run %{test} --color=always)))
+
+(rule
+  (deps test.thrift)
+  (targets test_consts.ml test_types.mli test_types.ml)
+  (action (run thrift --gen ocaml -out . %{deps} )))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

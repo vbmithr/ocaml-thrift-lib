@@ -20,21 +20,31 @@
 open Thrift
 module T = Transport
 
-class t (i,o) =
+class t ((i ,o) : (Buffer.t * Buffer.t)) =
 object
-  val mutable opened = true
+  val mutable _opened = true
+  val mutable _current_idx_input = 0
+
   inherit Transport.t
-  method isOpen = opened
+  method isOpen = _opened
   method opn = ()
-  method close = close_in i; opened <- false
+  method close = _opened <- false
   method read buf off len =
-    if opened then
-      try
-        really_input i buf off len; len
-      with _ -> raise (T.E (T.UNKNOWN, ("TChannelTransport: Could not read "^(string_of_int len))))
+    let input_buf_length = Buffer.length i in
+    if len + _current_idx_input > input_buf_length then
+      raise (T.E (T.UNKNOWN, "Input buffer overflow."))
     else
-      raise (T.E (T.NOT_OPEN, "TChannelTransport: Channel was closed"))
-  method write buf off len = output o buf off len
-  method write_string buf off len = output_substring o buf off len
-  method flush = flush o
+    for idx = 0 to len - 1 do
+      Bytes.set buf (off + idx) (Buffer.nth i (_current_idx_input + idx))
+    done;
+    _current_idx_input <- _current_idx_input + len;
+    len
+
+  method write buf off len =
+    Buffer.add_bytes o @@ Bytes.sub buf off len
+
+  method write_string buf off len =
+    Buffer.add_string o @@ String.sub buf off len
+
+  method flush = ()
 end
