@@ -1,6 +1,7 @@
 (test
   (name unit_tests)
   (libraries thrift alcotest)
+  (flags :standard -safe-string -warn-error -3-9-27-33-35-39)
   (preprocess
     (pps ppx_deriving.show ppx_deriving.eq))
   (action
@@ -10,7 +11,3 @@
   (deps test.thrift)
   (targets test_consts.ml test_types.mli test_types.ml)
   (action (run thrift --gen ocaml -out . %{deps} )))
-
-(env
-  (dev
-    (flags (:standard -warn-error -A))))
