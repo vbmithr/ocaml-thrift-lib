@@ -131,6 +131,25 @@ module type IntSig = sig
   val min_int : t
 end
 
+module Int = struct
+  type t = int
+  let logor = (lor)
+  let logand = (land)
+  let logxor = (lxor)
+  let shift_left = (lsl)
+  let shift_right = (asr)
+  let shift_right_logical = (lsr)
+  let neg = (~-)
+  let one = 1
+  let zero = 0
+  let of_int i = i
+  let to_int i = i
+  let to_string = string_of_int
+  let equal = (=)
+  let max_int = max_int
+  let min_int = min_int
+end
+
 module IntOps (I : IntSig) = struct
   let (lor) = I.logor
   let (land) = I.logand
@@ -141,11 +160,22 @@ module IntOps (I : IntSig) = struct
   let (~-) = I.neg
 end
 
+module Buffer = struct
+  include Buffer
+
+  let add_uint8 b x =
+    let bytes = Bytes.create 1 in
+    NativeEndian.set_int8 bytes 0 x;
+    Buffer.add_bytes b bytes
+end
+
 module ReadWriteInt (I : IntSig) = struct
+  module Ops = IntOps(I)
+  open I
+  open Ops
+
   let write_varint trans (n : I.t) =
     let buffer = Buffer.create 8 in
-    let open I in
-    let open IntOps(I) in
     let rec write_varint_aux (i : I.t) =
       let b = i land (of_int 0x7F) in
       let i = i lsr 7 in
@@ -158,8 +188,6 @@ module ReadWriteInt (I : IntSig) = struct
     trans#write_string st 0 @@ String.length st
 
   let read_varint trans buffer =
-    let open I in
-    let open IntOps(I) in
     let rec read_varint_aux (current_result : I.t) (shift_by : int) : I.t =
       trans#readAll buffer 0 1 |> ignore;
       let byte = LittleEndian.get_int8 buffer 0 in
@@ -173,20 +201,13 @@ module ReadWriteInt (I : IntSig) = struct
     read_varint_aux zero 0
 
   let from_zig_zag (n : I.t) : I.t =
-    let open IntOps(I) in
     (n lsr 1) lxor ~-(n land I.one)
 
   let to_zig_zag (n : I.t) (bits : int) : I.t =
-    let open IntOps(I) in
     (n lsl 1) lxor (n asr (bits - 1))
 end
 
-module RI   = ReadWriteInt(
-  struct
-    include Int
-    let of_int i = i
-    let to_int i = i
-  end)
+module RI   = ReadWriteInt(Int)
 module RI32 = ReadWriteInt(Int32)
 module RI64 = ReadWriteInt(Int64)
 

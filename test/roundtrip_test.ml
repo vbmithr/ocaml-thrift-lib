@@ -104,7 +104,8 @@ let test_round_trip protocol_factory () =
     round_tripped
 
 module TestReadWriteInt (I : TCompactProtocol.IntSig) = struct
-  open TCompactProtocol.ReadWriteInt(I)
+  module RWI = TCompactProtocol.ReadWriteInt(I)
+  open RWI
 
   module Testables = struct
     let pp = fun fmt t -> Format.fprintf fmt "%s" @@ I.to_string t
@@ -137,12 +138,7 @@ module TestReadWriteInt (I : TCompactProtocol.IntSig) = struct
   let case_naming test_name case = Printf.sprintf "%s (%s)" test_name @@ I.to_string case
 end
 
-module TRI   = TestReadWriteInt(
-  struct
-    include Int
-    let of_int i = i
-    let to_int i = i
-  end)
+module TRI   = TestReadWriteInt(TCompactProtocol.Int)
 module TRI32 = TestReadWriteInt(Int32)
 module TRI64 = TestReadWriteInt(Int64)
 
