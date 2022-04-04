@@ -352,7 +352,7 @@ object (self)
   method readStructBegin =
     _structs <- _last_fid :: _structs;
     _last_fid <- 0;
-    String.empty
+    ""
 
   method readStructEnd =
     _last_fid <- List.hd _structs;
