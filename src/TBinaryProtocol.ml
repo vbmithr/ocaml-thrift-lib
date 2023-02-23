@@ -53,26 +53,26 @@ object (self)
   inherit P.t trans
   val ibyte = Bytes.create 8
   method writeBool b =
-    ibyte.[0] <- char_of_int (if b then 1 else 0);
+    Bytes.set ibyte 0 (char_of_int (if b then 1 else 0));
     trans#write ibyte 0 1
   method writeByte i =
-    ibyte.[0] <- char_of_int (get_byte i 0);
+    Bytes.set ibyte 0 (char_of_int (get_byte i 0));
     trans#write ibyte 0 1
   method writeI16 i =
     let gb = get_byte i in
-      ibyte.[1] <- char_of_int (gb 0);
-      ibyte.[0] <- char_of_int (gb 1);
-      trans#write ibyte 0 2
+    Bytes.set ibyte 1 (char_of_int (gb 0));
+    Bytes.set ibyte 0 (char_of_int (gb 1));
+    trans#write ibyte 0 2
   method writeI32 i =
     let gb = get_byte32 i in
       for i=0 to 3 do
-        ibyte.[3-i] <- char_of_int (gb i)
+        Bytes.set ibyte (3-i) (char_of_int (gb i))
       done;
       trans#write ibyte 0 4
   method writeI64 i=
     let gb = get_byte64 i in
       for i=0 to 7 do
-        ibyte.[7-i] <- char_of_int (gb i)
+        Bytes.set ibyte (7-i) (char_of_int (gb i))
       done;
       trans#write ibyte 0 8
   method writeDouble d =
